@@ -8,11 +8,12 @@ import org.gradle.bot.model.CommitStatusEvent
 import org.gradle.bot.model.GitHubEvent
 import org.gradle.bot.model.IssueCommentEvent
 import org.gradle.bot.model.PullRequestEvent
-import java.util.logging.Logger
-import javax.inject.Inject
-import javax.inject.Singleton
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import java.security.MessageDigest
 
-val logger: Logger = Logger.getLogger(MainVerticle::class.java.name)
+
+val logger: Logger = LoggerFactory.getLogger(MainVerticle::class.java.name)
 
 val objectMapper = ObjectMapper()
 
@@ -22,12 +23,12 @@ val eventTypeToEventClassMap = mapOf(
         "issue_comment" to IssueCommentEvent::class.java
 )
 
-@Singleton
-class GitHubWebHookHandler @Inject constructor() : Handler<RoutingContext> {
+class GitHubWebHookHandler : Handler<RoutingContext> {
     override fun handle(context: RoutingContext?) {
         logger.info("Received webhook to ${GitHubWebHookHandler::class.java.simpleName}")
 
         context.parsePayloadEvent()?.apply {
+            println(this)
         } ?: logger.info("Received invalid GitHub webhook, discard.")
     }
 }
@@ -49,5 +50,14 @@ private fun RoutingContext?.isValidGitHubWebHook(): Boolean {
         // https://developer.github.com/webhooks/
         request().getHeader("X-GitHub-Event") != null
                 && bodyAsString != null
+                && verifySignature(bodyAsString, request().getHeader("X-Hub-Signature"))
+
     }
 }
+
+private fun verifySignature(body: String, signature: String?): Boolean {
+    val bodySignature = MessageDigest.getInstance("SHA-1").digest(body.toByteArray()).toHexString()
+    return "sha1=$bodySignature" == signature
+}
+
+private fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
