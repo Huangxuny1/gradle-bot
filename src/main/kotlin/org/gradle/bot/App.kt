@@ -85,10 +85,11 @@ open class GradleBotAppModule(private val vertx: Vertx) : AbstractModule() {
             })
 
     override fun configure() {
-        bind(Vertx::class.java).toInstance(vertx)
-        bind(WebClient::class.java).toInstance(client)
         bindAccessTokens()
         bindGitHubSignatureCheckerOnSecret()
+        bind(Vertx::class.java).toInstance(vertx)
+        bind(WebClient::class.java).toInstance(client)
+
     }
 
     open fun bindAccessTokens() {
@@ -98,7 +99,10 @@ open class GradleBotAppModule(private val vertx: Vertx) : AbstractModule() {
     open fun bindGitHubSignatureCheckerOnSecret() {
         when (System.getenv("GITHUB_WEBHOOK_SECRET")) {
             null -> bind(GithubSignatureChecker::class.java).toInstance(LenientGitHubSignatureCheck.INSTANCE)
-            else -> bind(GithubSignatureChecker::class.java).to(Sha1GitHubSignatureChecker::class.java)
+            else -> {
+                bindEnv("GITHUB_WEBHOOK_SECRET")
+                bind(GithubSignatureChecker::class.java).to(Sha1GitHubSignatureChecker::class.java)
+            }
         }
     }
 
