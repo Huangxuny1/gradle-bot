@@ -32,24 +32,24 @@ interface testInterface {
 @Singleton
 open class testInterfaceImpl @Inject constructor() : testInterface {
 
-    @DebugLog(LogLevel.INFO)
+    @Log(LogLevel.INFO)
     override fun testDoNoting() {
     }
 
-    @DebugLog(LogLevel.WARN)
+    @Log(LogLevel.WARN)
     override fun testMethod(arg1: String, arg2: Int): String = "$arg1$arg2"
 
-    @DebugLog
+    @Log
     override fun testException() {
         throw RuntimeException()
     }
 }
 
 @ExtendWith(MockitoExtension::class)
-class TestDebugLog {
+class TestLog {
 
     @Spy
-    var logger: Logger = LoggerFactory.getLogger("[JUST FOR TEST] " + TestDebugLog::class.java.simpleName)
+    var logger: Logger = LoggerFactory.getLogger("[JUST FOR TEST] " + TestLog::class.java.simpleName)
 
     @Captor
     lateinit var stringCaptor: ArgumentCaptor<String>
@@ -59,7 +59,7 @@ class TestDebugLog {
 
     lateinit var injector: Injector
 
-    private val debugLogMethodInterceptor = DebugLogMethodInterceptor()
+    private val debugLogMethodInterceptor = LogMethodInterceptor()
 
     lateinit var instance: testInterface
 
@@ -69,7 +69,7 @@ class TestDebugLog {
             it.bind(testInterface::class.java).to(testInterfaceImpl::class.java)
             it.bindInterceptor(Matchers.any(), object : AbstractMatcher<Method>() {
                 override fun matches(t: Method): Boolean {
-                    return t.isAnnotationPresent(DebugLog::class.java) && !t.isSynthetic
+                    return t.isAnnotationPresent(Log::class.java) && !t.isSynthetic
                 }
             }, debugLogMethodInterceptor)
         })

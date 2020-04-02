@@ -1,13 +1,12 @@
 package org.gradle.bot.aop.logging
 
-import com.google.inject.Singleton
 import org.aopalliance.intercept.MethodInterceptor
 import org.aopalliance.intercept.MethodInvocation
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 @Target(AnnotationTarget.FUNCTION)
-annotation class DebugLog(val level: LogLevel = LogLevel.DEBUG)
+annotation class Log(val level: LogLevel = LogLevel.DEBUG)
 
 enum class LogLevel {
     TRACE,
@@ -17,12 +16,11 @@ enum class LogLevel {
     ERROR
 }
 
-@Singleton
-class DebugLogMethodInterceptor : MethodInterceptor {
-    val logger: Logger = LoggerFactory.getLogger(DebugLogMethodInterceptor::class.java)
+class LogMethodInterceptor : MethodInterceptor {
+    val logger: Logger = LoggerFactory.getLogger(LogMethodInterceptor::class.java)
 
     override fun invoke(invocation: MethodInvocation): Any? {
-        val level = invocation.method.getAnnotation(DebugLog::class.java).level
+        val level = invocation.method.getAnnotation(Log::class.java).level
 
         val methodClass: String = invocation.method.declaringClass.name
         val methodName: String = invocation.method.name
