@@ -56,11 +56,11 @@ class DebugLogMethodInterceptor : MethodInterceptor {
 
     private fun getLogger(level: LogLevel, msg: String, vararg params: Any?) =
             when (level) {
-                LogLevel.TRACE -> if (logger.isTraceEnabled) logger.trace(msg, params) else {}
-                LogLevel.DEBUG -> if (logger.isDebugEnabled) logger.debug(msg, params) else {}
-                LogLevel.WARN -> logger.warn(msg, params)
-                LogLevel.INFO -> logger.info(msg, params)
-                LogLevel.ERROR -> logger.error(msg, params)
+                LogLevel.TRACE -> if (logger.isTraceEnabled) logger.trace(msg, *params) else {}
+                LogLevel.DEBUG -> if (logger.isDebugEnabled) logger.debug(msg, *params) else {}
+                LogLevel.WARN -> logger.warn(msg, *params)
+                LogLevel.INFO -> logger.info(msg, *params)
+                LogLevel.ERROR -> logger.error(msg, *params)
             }
 
     private fun toString(e: Throwable): String = "[" + e.javaClass.simpleName + "]" + e.message
